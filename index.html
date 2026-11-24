@@ -296,7 +296,7 @@
             <span class="text-[#FFD100]">WITH STI</span>
           </h1>
           <p class="mt-2.5 text-xs sm:text-sm font-semibold text-blue-100/95 max-w-[260px] leading-relaxed drop-shadow">
-            Soar past Academic &amp; Tech Pillars across the skies of Laoag!
+            Soar past towering STI Textbooks across the skies of Laoag!
           </p>
 
           <!-- Best Score Pill -->
@@ -772,6 +772,8 @@
           bobAmp: canBob ? 18 : 0,
           bobSpeed: 1.6 + Math.random() * 0.6,
           bobPhase: Math.random() * Math.PI * 2,
+          seed: Math.floor(Math.random() * 9999),
+          ribbonColor: Math.random() < 0.5 ? '#E11D48' : '#FFD100',
           bookColors: [
             ['#E11D48', '#FFD100', '#0EA5E9'],
             ['#10B981', '#F59E0B', '#6366F1'],
@@ -1336,7 +1338,24 @@
         ctx.restore();
       }
 
-      // Obstacles: STI Academic & Tech Pillars
+      // Obstacles: Towering STI Academic Hardbound Textbooks
+      const BOOK_PALETTES = [
+        { cover: '#004B93', spine: '#002E5C', light: '#1D70C9', gold: '#FFD100', text: '#EBF4FF' }, // STI Royal Blue
+        { cover: '#B91C1C', spine: '#7F1D1D', light: '#DC2626', gold: '#FDE047', text: '#FEF2F2' }, // Crimson Hardbound
+        { cover: '#047857', spine: '#064E3B', light: '#059669', gold: '#FDE047', text: '#ECFDF5' }, // Emerald Science
+        { cover: '#D97706', spine: '#92400E', light: '#F59E0B', gold: '#FEF08A', text: '#FFFBEB' }, // STI Amber / Gold
+        { cover: '#5B21B6', spine: '#4C1D95', light: '#7C3AED', gold: '#FDE047', text: '#F5F3FF' }, // Royal Purple
+        { cover: '#0E7490', spine: '#155E75', light: '#06B6D4', gold: '#FFD100', text: '#ECFEFF' }, // Cyan Tech Blue
+        { cover: '#1E293B', spine: '#0F172A', light: '#334155', gold: '#FACC15', text: '#F8FAFC' }  // Dark Slate IT
+      ];
+
+      const BOOK_TITLES = [
+        'IT 101', 'JAVA', 'WEB DEV', 'ALGORITHMS', 'C++', 'CALCULUS', 
+        'NETWORKING', 'STI CS', 'DATA SCI', 'SYS ARCH', 'ENGLISH', 'UI/UX', 
+        'COMP ENG', 'AI TECH', 'TOURISM', 'ACCT 1', 'MOBILE DEV', 'DATABASE', 
+        'PYTHON', 'SHS TECH'
+      ];
+
       function drawPillars() {
         for (let i = 0; i < pillars.length; i++) {
           const pil = pillars[i];
@@ -1344,102 +1363,173 @@
           const botY = pil.topHeight + pil.gap;
           const botH = height - GROUND_HEIGHT - botY;
 
-          drawSinglePillar(pil.x, 0, pil.width, topH, true, pil.bookColors);
-          drawSinglePillar(pil.x, botY, pil.width, botH, false, pil.bookColors);
+          drawSingleBookStack(pil, pil.x, 0, pil.width, topH, true);
+          drawSingleBookStack(pil, pil.x, botY, pil.width, botH, false);
         }
       }
 
-      function drawSinglePillar(x, y, w, h, isTop, bookColors) {
+      function drawSingleBookStack(pil, x, startY, w, h, isTop) {
         if (h <= 0) return;
-        const capH = 26;
-        const capOverhang = 5;
-
         ctx.save();
 
-        // Pillar shaft gradient (STI Royal Blue with 3D cylindrical depth)
-        const shaftGrad = ctx.createLinearGradient(x, 0, x + w, 0);
-        shaftGrad.addColorStop(0, '#003266');
-        shaftGrad.addColorStop(0.24, '#005BB5');
-        shaftGrad.addColorStop(0.55, '#004B93');
-        shaftGrad.addColorStop(1, '#002347');
+        const bookH = 26;
+        const totalBooks = Math.ceil(h / bookH) + 1;
 
-        ctx.fillStyle = shaftGrad;
-        ctx.fillRect(x, y, w, h);
-
-        // Crisp border
-        ctx.strokeStyle = '#001B38';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x, y, w, h);
-
-        // Tech / Circuit Line Accents along shaft
-        ctx.strokeStyle = 'rgba(255, 209, 0, 0.34)';
-        ctx.lineWidth = 1.6;
-        const circuitStart = isTop ? y + 12 : y + capH + 14;
-        const circuitEnd = isTop ? y + h - capH - 14 : y + h - 12;
-
-        if (circuitEnd > circuitStart + 18) {
-          ctx.beginPath();
-          ctx.moveTo(x + 18, circuitStart);
-          ctx.lineTo(x + 18, circuitEnd);
-          ctx.moveTo(x + w - 18, circuitStart + 10);
-          ctx.lineTo(x + w - 18, circuitEnd - 6);
-          ctx.stroke();
-
-          // Circuit nodes
-          ctx.fillStyle = 'rgba(255, 209, 0, 0.65)';
-          for (let cy = circuitStart + 14; cy < circuitEnd - 8; cy += 34) {
-            ctx.beginPath();
-            ctx.arc(x + 18, cy, 2.5, 0, Math.PI * 2);
-            ctx.arc(x + w - 18, cy + 12, 2.5, 0, Math.PI * 2);
-            ctx.fill();
+        for (let k = 0; k < totalBooks; k++) {
+          let rawBy, bh;
+          if (isTop) {
+            // Stack hangs down from ceiling; k=0 is the Hero Book touching the gap at h
+            rawBy = h - (k + 1) * bookH;
+            if (rawBy + bookH < 0) break;
+            const by = Math.max(0, rawBy);
+            bh = Math.min(bookH - 2.5, (rawBy < 0) ? (rawBy + bookH) : (bookH - 2.5));
+            if (bh <= 3) continue;
+            drawSingleBook(pil, x, by, bh, w, isTop, k);
+          } else {
+            // Stack rises from ground; k=0 is the Hero Book touching the gap at startY
+            rawBy = startY + k * bookH;
+            if (rawBy >= startY + h) break;
+            const by = rawBy;
+            bh = Math.min(bookH - 2.5, (startY + h) - rawBy);
+            if (bh <= 3) continue;
+            drawSingleBook(pil, x, by, bh, w, isTop, k);
           }
-        }
-
-        // Stacked Academic Textbooks detail right behind the golden cap
-        const bookStackY = isTop ? y + h - capH - 22 : y + capH + 4;
-        if (h > capH + 28) {
-          for (let b = 0; b < 3; b++) {
-            const by = bookStackY + b * 6;
-            ctx.fillStyle = bookColors[b];
-            ctx.fillRect(x + 7, by, w - 14, 5);
-            // Crisp white textbook page edge
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.82)';
-            ctx.fillRect(x + w - 15, by + 1, 6, 3);
-          }
-        }
-
-        // Golden Architectural Cap
-        const capY = isTop ? y + h - capH : y;
-        const capX = x - capOverhang;
-        const capW = w + capOverhang * 2;
-
-        const capGrad = ctx.createLinearGradient(capX, 0, capX + capW, 0);
-        capGrad.addColorStop(0, '#D49200');
-        capGrad.addColorStop(0.26, '#FFE66D');
-        capGrad.addColorStop(0.58, '#FFD100');
-        capGrad.addColorStop(1, '#B37800');
-
-        ctx.fillStyle = capGrad;
-        roundRectPath(ctx, capX, capY, capW, capH, 7);
-        ctx.fill();
-
-        ctx.strokeStyle = '#6E4700';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Cap specular highlight
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-        ctx.fillRect(capX + 8, capY + 3, capW - 16, 4);
-
-        // Subtle dark lip shadow on shaft
-        ctx.fillStyle = 'rgba(0, 15, 35, 0.28)';
-        if (isTop) {
-          ctx.fillRect(x + 1, capY - 5, w - 2, 5);
-        } else {
-          ctx.fillRect(x + 1, capY + capH, w - 2, 5);
         }
 
         ctx.restore();
+      }
+
+      function drawSingleBook(pil, x, by, bh, w, isTop, k) {
+        const bookSeed = ((pil.seed || 101) + (isTop ? 5432 : 1234) + k * 37);
+        const p = BOOK_PALETTES[bookSeed % BOOK_PALETTES.length];
+        const title = BOOK_TITLES[bookSeed % BOOK_TITLES.length];
+
+        // Organic stack jitter (-2px to +2px)
+        const jitter = ((bookSeed % 5) - 2) * 0.9;
+        const widthMod = ((bookSeed % 3) - 1) * 1.5;
+        const bx = x + jitter;
+        const bw = w + widthMod;
+
+        // 1. Soft Drop Shadow below book
+        ctx.fillStyle = 'rgba(0, 10, 25, 0.28)';
+        ctx.fillRect(bx + 1, by + bh, bw - 2, 2.5);
+
+        // 2. Spine Background with 3D Curvature Gradient
+        const spineGrad = ctx.createLinearGradient(bx, by, bx, by + bh);
+        spineGrad.addColorStop(0, p.light);
+        spineGrad.addColorStop(0.2, p.cover);
+        spineGrad.addColorStop(0.8, p.cover);
+        spineGrad.addColorStop(1, p.spine);
+
+        ctx.fillStyle = spineGrad;
+        roundRectPath(ctx, bx, by, bw, bh, 3.5);
+        ctx.fill();
+
+        // Dark binding border
+        ctx.strokeStyle = p.spine;
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // 3. Cylindrical Horizontal Light Reflection
+        const horizShade = ctx.createLinearGradient(bx, 0, bx + bw, 0);
+        horizShade.addColorStop(0, 'rgba(0,0,0,0.22)');
+        horizShade.addColorStop(0.12, 'rgba(255,255,255,0.14)');
+        horizShade.addColorStop(0.4, 'rgba(255,255,255,0)');
+        horizShade.addColorStop(0.72, 'rgba(0,0,0,0.08)');
+        horizShade.addColorStop(1, 'rgba(0,0,0,0.32)');
+        ctx.fillStyle = horizShade;
+        roundRectPath(ctx, bx, by, bw, bh, 3.5);
+        ctx.fill();
+
+        // 4. Fore-Edge Paper Block (Right side showing paper pages)
+        const pageW = 12;
+        const pageX = bx + bw - pageW - 2;
+        const pageY = by + 2;
+        const pageH = bh - 4;
+        if (pageH > 3) {
+          ctx.fillStyle = '#FFFDEC';
+          ctx.fillRect(pageX, pageY, pageW, pageH);
+
+          // Subtle horizontal page lines
+          ctx.fillStyle = 'rgba(160, 135, 95, 0.4)';
+          if (pageH >= 7) {
+            ctx.fillRect(pageX + 1, pageY + Math.floor(pageH * 0.35), pageW - 2, 1);
+            ctx.fillRect(pageX + 1, pageY + Math.floor(pageH * 0.7), pageW - 2, 1);
+          }
+
+          // Hardcover outer lip
+          ctx.fillStyle = p.spine;
+          ctx.fillRect(bx + bw - 2.5, by, 2.5, bh);
+        }
+
+        // 5. Gold Foil Raised Spine Ribs
+        ctx.fillStyle = p.gold;
+        ctx.fillRect(bx + 4, by + 2.5, 2, bh - 5);
+        ctx.fillRect(bx + 8, by + 2.5, 1.2, bh - 5);
+
+        // 6. Embossed Course / Subject Title on Spine
+        if (bh >= 14) {
+          ctx.save();
+          ctx.font = 'bold 8.5px "Montserrat", sans-serif';
+          ctx.fillStyle = p.text;
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
+          ctx.shadowBlur = 2;
+          ctx.fillText(title, bx + 16, by + bh * 0.5 + 3);
+          ctx.restore();
+        }
+
+        // 7. Hero Book Polish (k === 0 at the gap)
+        if (k === 0) {
+          // Brass metal corner protectors on opening edge
+          if (bh > 12) {
+            ctx.fillStyle = '#FFD100';
+            const cornerSize = 7.5;
+            const cy = isTop ? (by + bh - cornerSize) : by;
+            ctx.beginPath();
+            ctx.moveTo(bx, cy + (isTop ? cornerSize : 0));
+            ctx.lineTo(bx + cornerSize, cy + (isTop ? cornerSize : 0));
+            ctx.lineTo(bx, cy + (isTop ? 0 : cornerSize));
+            ctx.closePath();
+            ctx.fill();
+
+            // Tiny brass rivet
+            ctx.fillStyle = '#78350F';
+            ctx.fillRect(bx + 2, cy + (isTop ? 4.5 : 1.5), 1.5, 1.5);
+          }
+
+          // Animated Satin Bookmark Ribbon fluttering in the gap
+          const ribbonColor = pil.ribbonColor || '#E11D48';
+          const rx = bx + bw - 14;
+          const ry = isTop ? (by + bh) : by;
+          const sway = Math.sin(globalTime * 4.8 + pil.x * 0.05) * 4.5;
+
+          ctx.save();
+          ctx.strokeStyle = ribbonColor;
+          ctx.lineWidth = 3.2;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(rx, ry);
+          if (isTop) {
+            ctx.quadraticCurveTo(rx + sway * 0.5, ry + 9, rx + sway, ry + 18);
+          } else {
+            ctx.quadraticCurveTo(rx + sway * 0.5, ry - 8, rx + sway, ry - 16);
+          }
+          ctx.stroke();
+
+          // Golden tipped ribbon edge
+          ctx.strokeStyle = '#FFD100';
+          ctx.lineWidth = 3.2;
+          ctx.beginPath();
+          if (isTop) {
+            ctx.moveTo(rx + sway - 0.5, ry + 16);
+            ctx.lineTo(rx + sway, ry + 18);
+          } else {
+            ctx.moveTo(rx + sway - 0.5, ry - 14);
+            ctx.lineTo(rx + sway, ry - 16);
+          }
+          ctx.stroke();
+          ctx.restore();
+        }
       }
 
       // Foreground Scrolling Ground with STI Blue-and-Yellow Architectural Curb
