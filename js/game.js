@@ -1,6 +1,6 @@
 /**
      * =========================================================================
-     * FLY HIGH WITH STI — STI College Laoag Edition
+     * AIM HIGH WITH STI — STI College Laoag Edition
      * Complete HTML5 Canvas Game with Web Audio API, Parallax Ilocos/Laoag
      * Scenery, Custom STI Emblem Physics, and Flutter-Inspired UI Overlays.
      * =========================================================================
@@ -62,12 +62,14 @@
       const certScore = document.getElementById('certScore');
       const certToast = document.getElementById('certToast');
 
-      const STORAGE_KEY = 'flyHighSTI_laoag_bestScore';
-      const STUDENT_NAME_KEY = 'flyHighSTI_laoag_studentName';
+      const STORAGE_KEY = 'aimHighSTI_laoag_bestScore';
+      const LEGACY_STORAGE_KEY = 'flyHighSTI_laoag_bestScore';
+      const STUDENT_NAME_KEY = 'aimHighSTI_laoag_studentName';
+      const LEGACY_NAME_KEY = 'flyHighSTI_laoag_studentName';
 
       function loadBestScore() {
         try {
-          const saved = localStorage.getItem(STORAGE_KEY);
+          const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
           return saved ? Math.max(0, parseInt(saved, 10) || 0) : 0;
         } catch (err) {
           return 0;
@@ -84,7 +86,7 @@
 
       function loadStudentName() {
         try {
-          return localStorage.getItem(STUDENT_NAME_KEY) || 'Certified STIer';
+          return localStorage.getItem(STUDENT_NAME_KEY) || localStorage.getItem(LEGACY_NAME_KEY) || 'Certified STIer';
         } catch (err) {
           return 'Certified STIer';
         }
@@ -103,6 +105,8 @@
         constructor() {
           this.enabled = true;
           this.ctx = null;
+          this.masterGain = null;
+          this.compressor = null;
         }
 
         ensureContext() {
@@ -110,7 +114,24 @@
           try {
             if (!this.ctx) {
               const AudioCtx = window.AudioContext || window.webkitAudioContext;
-              if (AudioCtx) this.ctx = new AudioCtx();
+              if (AudioCtx) {
+                this.ctx = new AudioCtx();
+
+                // High-End Dynamics Compressor (Prevents distortion when boosting volume)
+                this.compressor = this.ctx.createDynamicsCompressor();
+                this.compressor.threshold.setValueAtTime(-12, this.ctx.currentTime);
+                this.compressor.knee.setValueAtTime(10, this.ctx.currentTime);
+                this.compressor.ratio.setValueAtTime(4, this.ctx.currentTime);
+                this.compressor.attack.setValueAtTime(0.003, this.ctx.currentTime);
+                this.compressor.release.setValueAtTime(0.12, this.ctx.currentTime);
+
+                // Master Volume Booster (Louder, punchier audio output)
+                this.masterGain = this.ctx.createGain();
+                this.masterGain.gain.setValueAtTime(1.9, this.ctx.currentTime);
+
+                this.compressor.connect(this.masterGain);
+                this.masterGain.connect(this.ctx.destination);
+              }
             }
             if (this.ctx && this.ctx.state === 'suspended') {
               this.ctx.resume();
@@ -119,6 +140,10 @@
           } catch (e) {
             return null;
           }
+        }
+
+        getMasterInput() {
+          return this.compressor || (this.ctx ? this.ctx.destination : null);
         }
 
         toggle() {
@@ -130,32 +155,59 @@
           return this.enabled;
         }
 
-        // Crisp upward whoosh on flap
+        // Harmonious STI collegiate startup arpeggio (Loud & resonant)
+        playStartup() {
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          const target = this.getMasterInput();
+          const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+
+            gain.gain.setValueAtTime(0.001, now + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.42, now + idx * 0.08 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.08 + 0.48);
+
+            osc.connect(gain);
+            gain.connect(target);
+
+            osc.start(now + idx * 0.08);
+            osc.stop(now + idx * 0.08 + 0.5);
+          });
+        }
+
+        // Crisp, punchy upward whoosh on flap
         playFlap() {
           const ctx = this.ensureContext();
           if (!ctx) return;
           const now = ctx.currentTime;
+          const target = this.getMasterInput();
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(290, now);
-          osc.frequency.exponentialRampToValueAtTime(590, now + 0.11);
+          osc.frequency.setValueAtTime(260, now);
+          osc.frequency.exponentialRampToValueAtTime(620, now + 0.11);
 
           gain.gain.setValueAtTime(0.001, now);
-          gain.gain.linearRampToValueAtTime(0.14, now + 0.02);
+          gain.gain.linearRampToValueAtTime(0.38, now + 0.02);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
 
           osc.connect(gain);
-          gain.connect(ctx.destination);
+          gain.connect(target);
           osc.start(now);
           osc.stop(now + 0.14);
         }
 
-        // Bright academic chime on scoring
+        // Bright, loud academic chime on scoring (+1)
         playScore() {
           const ctx = this.ensureContext();
           if (!ctx) return;
           const now = ctx.currentTime;
+          const target = this.getMasterInput();
           const notes = [587.33, 880.0]; // D5 -> A5
           notes.forEach((freq, idx) => {
             const osc = ctx.createOscillator();
@@ -164,20 +216,21 @@
             const t = now + idx * 0.065;
             osc.frequency.setValueAtTime(freq, t);
             gain.gain.setValueAtTime(0.001, t);
-            gain.gain.linearRampToValueAtTime(0.15, t + 0.015);
+            gain.gain.linearRampToValueAtTime(0.44, t + 0.015);
             gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
             osc.connect(gain);
-            gain.connect(ctx.destination);
+            gain.connect(target);
             osc.start(t);
             osc.stop(t + 0.24);
           });
         }
 
-        // Celebratory arpeggio on new high score or 10-pt milestone
+        // Celebratory loud arpeggio on new high score or milestone
         playMilestone() {
           const ctx = this.ensureContext();
           if (!ctx) return;
           const now = ctx.currentTime;
+          const target = this.getMasterInput();
           const notes = [523.25, 659.25, 783.99, 1046.5]; // C5 E5 G5 C6
           notes.forEach((freq, idx) => {
             const osc = ctx.createOscillator();
@@ -186,20 +239,21 @@
             const t = now + idx * 0.07;
             osc.frequency.setValueAtTime(freq, t);
             gain.gain.setValueAtTime(0.001, t);
-            gain.gain.linearRampToValueAtTime(0.16, t + 0.02);
-            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+            gain.gain.linearRampToValueAtTime(0.48, t + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
             osc.connect(gain);
-            gain.connect(ctx.destination);
+            gain.connect(target);
             osc.start(t);
-            osc.stop(t + 0.32);
+            osc.stop(t + 0.34);
           });
         }
 
-        // Bubbly ascending chime for star & shield pickup
+        // Loud bubbly chime for star & shield pickup
         playPowerup() {
           const ctx = this.ensureContext();
           if (!ctx) return;
           const now = ctx.currentTime;
+          const target = this.getMasterInput();
           const notes = [659.25, 830.61, 1046.5]; // E5, G#5, C6
           notes.forEach((freq, idx) => {
             const osc = ctx.createOscillator();
@@ -208,20 +262,21 @@
             const t = now + idx * 0.055;
             osc.frequency.setValueAtTime(freq, t);
             gain.gain.setValueAtTime(0.001, t);
-            gain.gain.linearRampToValueAtTime(0.18, t + 0.015);
-            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+            gain.gain.linearRampToValueAtTime(0.46, t + 0.015);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
             osc.connect(gain);
-            gain.connect(ctx.destination);
+            gain.connect(target);
             osc.start(t);
-            osc.stop(t + 0.2);
+            osc.stop(t + 0.22);
           });
         }
 
-        // Warm ascending chord for coffee high
+        // Warm ascending chord for coffee focus mode
         playCoffee() {
           const ctx = this.ensureContext();
           if (!ctx) return;
           const now = ctx.currentTime;
+          const target = this.getMasterInput();
           const notes = [440, 554.37, 659.25, 880]; // A4, C#5, E5, A5
           notes.forEach((freq, idx) => {
             const osc = ctx.createOscillator();
@@ -230,12 +285,12 @@
             const t = now + idx * 0.045;
             osc.frequency.setValueAtTime(freq, t);
             gain.gain.setValueAtTime(0.001, t);
-            gain.gain.linearRampToValueAtTime(0.16, t + 0.015);
-            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+            gain.gain.linearRampToValueAtTime(0.44, t + 0.015);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
             osc.connect(gain);
-            gain.connect(ctx.destination);
+            gain.connect(target);
             osc.start(t);
-            osc.stop(t + 0.24);
+            osc.stop(t + 0.26);
           });
         }
 
@@ -244,47 +299,59 @@
           const ctx = this.ensureContext();
           if (!ctx) return;
           const now = ctx.currentTime;
+          const target = this.getMasterInput();
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.type = 'square';
-          osc.frequency.setValueAtTime(800, now);
-          osc.frequency.exponentialRampToValueAtTime(200, now + 0.18);
-          gain.gain.setValueAtTime(0.2, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.frequency.setValueAtTime(850, now);
+          osc.frequency.exponentialRampToValueAtTime(180, now + 0.2);
+          gain.gain.setValueAtTime(0.52, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
           osc.connect(gain);
-          gain.connect(ctx.destination);
+          gain.connect(target);
           osc.start(now);
-          osc.stop(now + 0.22);
+          osc.stop(now + 0.24);
         }
 
-        // Soft impact thud on collision
+        // Heavy, punchy impact thud on collision
         playCrash() {
           const ctx = this.ensureContext();
           if (!ctx) return;
           const now = ctx.currentTime;
+          const target = this.getMasterInput();
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(160, now);
-          osc.frequency.exponentialRampToValueAtTime(42, now + 0.26);
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.exponentialRampToValueAtTime(36, now + 0.3);
 
-          // Low-pass filter for softer thud
           const filter = ctx.createBiquadFilter();
           filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(480, now);
+          filter.frequency.setValueAtTime(520, now);
 
-          gain.gain.setValueAtTime(0.22, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          gain.gain.setValueAtTime(0.65, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
 
           osc.connect(filter);
           filter.connect(gain);
-          gain.connect(ctx.destination);
+          gain.connect(target);
           osc.start(now);
-          osc.stop(now + 0.3);
+          osc.stop(now + 0.34);
         }
       }
 
       const sfx = new SoundFX();
+
+      /* -----------------------------------------------------------------------
+       * HAPTIC FEEDBACK CONTROLLER (Tactile Vibration API)
+       * --------------------------------------------------------------------- */
+      function triggerHaptic(pattern) {
+        try {
+          if (navigator && typeof navigator.vibrate === 'function') {
+            navigator.vibrate(pattern);
+          }
+        } catch (e) {}
+      }
 
       /* -----------------------------------------------------------------------
        * 3. GAME STATE & CONFIGURATION
@@ -683,6 +750,7 @@
         player.scaleY = 0.84;
         emitFlapParticles();
         sfx.playFlap();
+        triggerHaptic(14);
       }
 
       function togglePause() {
@@ -705,9 +773,10 @@
         gameState = STATE.GAMEOVER;
         gameOverTimestamp = performance.now();
         sfx.playCrash();
+        triggerHaptic([90, 40, 160]);
 
-        shakeTime = 0.28;
-        shakeMagnitude = 9;
+        shakeTime = 0.35;
+        shakeMagnitude = 12;
         flashAlpha = 0.55;
 
         const isNewRecord = score > bestScore;
@@ -793,8 +862,10 @@
         } else if (hitMilestone) {
           emitConfettiBurst(player.x + 20, player.y - 10, 26);
           sfx.playMilestone();
+          triggerHaptic([35, 30, 35, 30, 60]);
         } else {
           sfx.playScore();
+          triggerHaptic([16, 25, 20]);
         }
 
         if (score > bestScore) {
@@ -955,6 +1026,7 @@
             invulnerableTimer = 1.2;
             streakCount = 0;
             sfx.playShieldBreak();
+            triggerHaptic([50, 35, 60]);
             shakeTime = 0.22;
             shakeMagnitude = 8;
             player.y = height - GROUND_HEIGHT - player.radius - 2;
@@ -1006,6 +1078,7 @@
                 invulnerableTimer = 1.2;
                 streakCount = 0;
                 sfx.playShieldBreak();
+            triggerHaptic([50, 35, 60]);
                 shakeTime = 0.22;
                 shakeMagnitude = 8;
                 flashAlpha = 0.45;
@@ -1037,11 +1110,13 @@
             if (p.type === 'coffee') {
               coffeeSlowMoTimer = 3.5;
               sfx.playCoffee();
+              triggerHaptic([30, 30, 40]);
               spawnPopup("☕ COFFEE HIGH!", p.x, p.y, "#F59E0B");
               emitExplosion(p.x, p.y, '#F59E0B');
             } else if (p.type === 'shield') {
               hasShield = true;
               sfx.playPowerup();
+              triggerHaptic([30, 30, 40]);
               spawnPopup("🛡️ DEAN'S PASS!", p.x, p.y, "#38BDF8");
               emitExplosion(p.x, p.y, '#38BDF8');
             } else {
@@ -1862,8 +1937,14 @@
         saveStudentName(certStudentName.value.trim());
       });
 
-      saveCertImgBtn.addEventListener('click', downloadCertificateImage);
-      copyCertTextBtn.addEventListener('click', copyScoreToClipboard);
+      saveCertImgBtn.addEventListener('click', () => {
+        triggerHaptic(12);
+        downloadCertificateImage();
+      });
+      copyCertTextBtn.addEventListener('click', () => {
+        triggerHaptic(12);
+        copyScoreToClipboard();
+      });
 
             function downloadCertificateImage() {
         const studentName = certStudentName.value.trim() || 'Certified STIer';
@@ -2269,7 +2350,7 @@
       function copyScoreToClipboard() {
         const studentName = certStudentName.value.trim() || 'STIer';
         const rank = getStudentRank(score);
-        const text = `🎓 FLY HIGH WITH STI (Laoag Edition)\n👤 Flyer: ${studentName}\n🏅 Rank: ${rank.title} ${rank.emoji}\n🎯 Score: ${score} pts (Best: ${bestScore} pts)\n\nKaya mo bang higitan ang score ko sa Laoag skies? Be Future-Ready! 🚀`;
+        const text = `🎓 AIM HIGH WITH STI (Laoag Edition)\n👤 Flyer: ${studentName}\n🏅 Rank: ${rank.title} ${rank.emoji}\n🎯 Score: ${score} pts (Best: ${bestScore} pts)\n\nKaya mo bang higitan ang score ko sa Laoag skies? Be Future-Ready! 🚀`;
         navigator.clipboard.writeText(text).then(() => {
           certToast.classList.remove('hidden');
           setTimeout(() => certToast.classList.add('hidden'), 2500);
@@ -2277,8 +2358,14 @@
       }
 
       // Button Event Listeners
-      playNowBtn.addEventListener('click', startGame);
-      playAgainBtn.addEventListener('click', startGame);
+      playNowBtn.addEventListener('click', () => {
+        triggerHaptic(12);
+        startGame();
+      });
+      playAgainBtn.addEventListener('click', () => {
+        triggerHaptic(12);
+        startGame();
+      });
       pauseBtn.addEventListener('click', togglePause);
       resumeBtn.addEventListener('click', togglePause);
       pauseRestartBtn.addEventListener('click', startGame);
@@ -2294,6 +2381,71 @@
       window.addEventListener('resize', resizeCanvas);
 
       // Start everything safely on window load
+      
+      /* -----------------------------------------------------------------------
+       * FLUTTER SPLASH SCREEN CONTROLLER
+       * --------------------------------------------------------------------- */
+      const splashScreenEl = document.getElementById('splashScreen');
+      const splashStatusTextEl = document.getElementById('splashStatusText');
+      const skipSplashBtn = document.getElementById('skipSplashBtn');
+      let splashDismissed = false;
+
+      function dismissSplashScreen() {
+        if (splashDismissed || !splashScreenEl) return;
+        splashDismissed = true;
+
+        // Play uplifting STI startup chime
+        try { sfx.playStartup(); } catch (e) {}
+
+        // Add Flutter hero scale-out exit class
+        splashScreenEl.classList.add('splash-dismissed');
+
+        setTimeout(() => {
+          if (splashScreenEl && splashScreenEl.parentNode) {
+            splashScreenEl.style.display = 'none';
+          }
+        }, 700);
+      }
+
+      if (splashScreenEl) {
+        // Dynamic status updates
+        setTimeout(() => {
+          if (!splashDismissed && splashStatusTextEl) {
+            splashStatusTextEl.textContent = 'Calibrating Laoag Textbooks... 📚';
+          }
+        }, 800);
+
+        setTimeout(() => {
+          if (!splashDismissed && splashStatusTextEl) {
+            splashStatusTextEl.textContent = 'Campus Skyway Ready! 🚀';
+          }
+        }, 1600);
+
+        // Auto-dismiss after 2.3 seconds
+        setTimeout(() => {
+          dismissSplashScreen();
+        }, 2350);
+
+        // Tap/click anywhere to skip immediately
+        splashScreenEl.addEventListener('click', () => {
+          dismissSplashScreen();
+        });
+
+        if (skipSplashBtn) {
+          skipSplashBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dismissSplashScreen();
+          });
+        }
+
+        // Space/Enter/Arrow keys to skip
+        window.addEventListener('keydown', (e) => {
+          if (!splashDismissed && (e.code === 'Space' || e.code === 'Enter')) {
+            dismissSplashScreen();
+          }
+        }, { once: true });
+      }
+
       window.onload = function () {
         syncBestScoreUI();
         resizeCanvas();

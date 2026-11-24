@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Fly High with STI — STI College Laoag</title>
+  <title>Aim High with STI — STI College Laoag</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
@@ -15,6 +15,96 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <!-- =======================================================================
+       FLUTTER ANIMATED SPLASH SCREEN (STI College Laoag)
+       ======================================================================= -->
+  <div id="splashScreen" class="flutter-splash fixed inset-0 z-50 flex flex-col items-center justify-between p-6 select-none overflow-hidden cursor-pointer" role="dialog" aria-modal="true" aria-label="Loading Aim High with STI">
+    <!-- Flutter Ambient Radial Glow & Energy Rings -->
+    <div class="flutter-ambient-glow"></div>
+    <div class="flutter-ambient-rings pointer-events-none">
+      <div class="flutter-ring ring-1"></div>
+      <div class="flutter-ring ring-2"></div>
+      <div class="flutter-ring ring-3"></div>
+    </div>
+
+    <!-- Top Campus Tag (Staggered Entrance 1) -->
+    <div class="flutter-anim-stagger-1 mt-3 sm:mt-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#002D5A]/80 backdrop-blur-md border border-[#FFD100]/60 shadow-lg">
+      <span class="w-2.5 h-2.5 rounded-full bg-[#FFD100] animate-ping"></span>
+      <span class="text-xs font-black tracking-widest uppercase text-[#FFD100]">STI College Laoag</span>
+    </div>
+
+    <!-- Center Hero Section (Staggered Entrance 2) -->
+    <div class="flutter-hero flex flex-col items-center text-center my-auto">
+      <!-- Animated STI Hero Badge with Flutter Elastic Spring & Golden Wings -->
+      <div class="flutter-emblem-wrap relative mb-5">
+        <!-- Golden Wing Left -->
+        <svg class="flutter-wing flutter-wing-left drop-shadow-[0_8px_16px_rgba(0,25,60,0.5)]" viewBox="0 0 100 70">
+          <path d="M90 50 C50 50, 20 35, 10 15 C30 20, 60 25, 90 35 Z" fill="#FFD100" stroke="#B87D00" stroke-width="2.5" />
+          <path d="M85 58 C55 60, 30 50, 18 35 C38 40, 62 42, 85 47 Z" fill="#FFE66D" stroke="#B87D00" stroke-width="2" />
+        </svg>
+
+        <!-- Central STI Badge -->
+        <div class="flutter-emblem-badge relative">
+          <svg width="136" height="98" viewBox="0 0 136 98" fill="none" class="drop-shadow-[0_16px_32px_rgba(0,18,48,0.75)]">
+            <rect x="12" y="8" width="112" height="82" rx="26" fill="url(#splashBadgeGrad)" stroke="#FFD100" stroke-width="5"/>
+            <!-- Gloss highlight -->
+            <path d="M20 18 C20 14, 25 12, 30 12 H106 C111 12, 116 14, 116 18 V32 C88 44, 46 44, 20 32 Z" fill="white" fill-opacity="0.28"/>
+            <!-- STI Bold Text -->
+            <text x="68" y="63" text-anchor="middle" fill="#FFD100" font-family="'Outfit', sans-serif" font-weight="900" font-size="44" letter-spacing="2">STI</text>
+            <defs>
+              <linearGradient id="splashBadgeGrad" x1="12" y1="8" x2="124" y2="90" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#006CD9"/>
+                <stop offset="0.55" stop-color="#004B93"/>
+                <stop offset="1" stop-color="#002247"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <!-- Shimmer Sweep Effect -->
+          <div class="flutter-shimmer-sheen"></div>
+        </div>
+
+        <!-- Golden Wing Right -->
+        <svg class="flutter-wing flutter-wing-right drop-shadow-[0_8px_16px_rgba(0,25,60,0.5)]" viewBox="0 0 100 70">
+          <path d="M10 50 C50 50, 80 35, 90 15 C70 20, 40 25, 10 35 Z" fill="#FFD100" stroke="#B87D00" stroke-width="2.5" />
+          <path d="M15 58 C45 60, 70 50, 82 35 C62 40, 38 42, 15 47 Z" fill="#FFE66D" stroke="#B87D00" stroke-width="2" />
+        </svg>
+      </div>
+
+      <!-- App Title (Staggered Entrance 3) -->
+      <h1 class="flutter-title font-display font-black text-4xl sm:text-5xl leading-none text-white tracking-tight drop-shadow-[0_4px_16px_rgba(0,40,90,0.9)]">
+        AIM HIGH <span class="text-[#FFD100]">WITH STI</span>
+      </h1>
+
+      <!-- Tagline Pill (Staggered Entrance 4) -->
+      <div class="flutter-tagline mt-3 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#FFD100]/25 via-[#FFD100]/35 to-[#FFD100]/25 border border-[#FFD100]/70 shadow-md">
+        <span class="text-xs font-black tracking-widest text-[#FFD100] uppercase">"BE FUTURE-READY"</span>
+      </div>
+
+      <!-- Subtitle Description -->
+      <p class="flutter-desc mt-3 text-xs sm:text-sm font-bold text-blue-100/90 max-w-[280px] drop-shadow">
+        The Official Collegiate Aerial Arcade of Laoag City
+      </p>
+    </div>
+
+    <!-- Bottom Loading Section (Staggered Entrance 5) -->
+    <div class="flutter-bottom w-full max-w-[280px] flex flex-col items-center gap-2.5 mb-5">
+      <!-- Loading Bar Track (Flutter LinearProgressIndicator look & feel) -->
+      <div class="w-full h-1.5 bg-white/15 rounded-full overflow-hidden relative shadow-inner">
+        <div id="splashProgressBar" class="flutter-progress-bar h-full rounded-full bg-gradient-to-r from-[#FFD100] via-[#FFE566] to-[#FFB800]"></div>
+      </div>
+
+      <!-- Dynamic Status Text -->
+      <p id="splashStatusText" class="text-xs font-bold text-yellow-300 tracking-wide">
+        Initializing Flight Systems...
+      </p>
+
+      <!-- Skip Button / Tap Hint -->
+      <button id="skipSplashBtn" type="button" class="text-[11px] font-semibold text-white/70 hover:text-[#FFD100] transition-colors cursor-pointer tracking-wider uppercase mt-1">
+        Tap anywhere to enter &rsaquo;
+      </button>
+    </div>
+  </div>
+
   <main class="game-shell">
     <!-- Top Control Bar (Outside Game Canvas) -->
     <header class="w-full max-w-[440px] flex items-center justify-between gap-2 px-1">
@@ -64,7 +154,7 @@
 
     <!-- Main Game Canvas Stage -->
     <section id="canvasStage" class="canvas-stage">
-      <canvas id="gameCanvas" aria-label="Fly High with STI Game Canvas"></canvas>
+      <canvas id="gameCanvas" aria-label="Aim High with STI Game Canvas"></canvas>
 
       <!-- In-Game Floating Score HUD -->
       <div id="inGameHud" class="pointer-events-none absolute inset-x-0 top-5 flex flex-col items-center z-10 opacity-0 transition-opacity duration-200">
@@ -127,7 +217,7 @@
           </div>
 
           <h1 class="font-display font-black text-4xl sm:text-[42px] leading-[1.02] tracking-tight text-white drop-shadow-[0_5px_0_#002D5A]">
-            FLY HIGH<br />
+            AIM HIGH<br />
             <span class="text-[#FFD100]">WITH STI</span>
           </h1>
           <p class="mt-2.5 text-xs sm:text-sm font-bold text-white max-w-[270px] leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">

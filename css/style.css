@@ -1,5 +1,5 @@
 /* ==========================================================================
-   FLY HIGH WITH STI — STI College Laoag Edition
+   AIM HIGH WITH STI — STI College Laoag Edition
    Arcade Stage, Animations & Glassmorphic Custom Styling
    ========================================================================== */
 
@@ -180,3 +180,213 @@
       visibility: visible;
       transition: opacity 0.22s ease, visibility 0.22s ease;
     }
+
+
+/* ==========================================================================
+   FLUTTER ANIMATED SPLASH SCREEN STYLES
+   CurvedAnimation, Elastic Spring Physics, Shimmer & Ripple Rings
+   ========================================================================== */
+
+.flutter-splash {
+  background: radial-gradient(circle at center, #003366 0%, #001E3D 45%, #001024 100%);
+  transition: opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.65s cubic-bezier(0.4, 0, 0.2, 1),
+              filter 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity, transform, filter;
+}
+
+.flutter-splash.splash-dismissed {
+  opacity: 0;
+  transform: scale(1.08);
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+/* Ambient Radial Glow & Shockwave Energy Rings */
+.flutter-ambient-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 380px;
+  height: 380px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(0, 102, 204, 0.35) 0%, rgba(255, 209, 0, 0.12) 45%, transparent 70%);
+  border-radius: 50%;
+  animation: flutterGlowPulse 3s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.flutter-ambient-rings {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flutter-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 209, 0, 0.35);
+  animation: flutterRingExpand 2.6s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+.flutter-ring.ring-1 { width: 140px; height: 140px; animation-delay: 0.1s; }
+.flutter-ring.ring-2 { width: 140px; height: 140px; animation-delay: 0.9s; }
+.flutter-ring.ring-3 { width: 140px; height: 140px; animation-delay: 1.7s; }
+
+@keyframes flutterGlowPulse {
+  0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+}
+
+@keyframes flutterRingExpand {
+  0% { transform: scale(0.5); opacity: 0.8; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+
+/* Flutter Hero Emblem & Spring Animation (Curves.elasticOut) */
+.flutter-emblem-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: flutterHeroSpring 1.1s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes flutterHeroSpring {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) translateY(60px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.16) translateY(-12px);
+  }
+  80% {
+    transform: scale(0.96) translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Golden Wings Opening and Fluttering */
+.flutter-wing {
+  width: 60px;
+  height: 44px;
+  position: absolute;
+  top: 26px;
+  transform-origin: center center;
+  transition: transform 0.3s ease;
+}
+
+.flutter-wing-left {
+  right: 88%;
+  animation: flutterWingLeft 1.4s cubic-bezier(0.25, 1, 0.5, 1) both,
+             flutterWingIdleLeft 2s ease-in-out infinite 1.4s alternate;
+}
+
+.flutter-wing-right {
+  left: 88%;
+  animation: flutterWingRight 1.4s cubic-bezier(0.25, 1, 0.5, 1) both,
+             flutterWingIdleRight 2s ease-in-out infinite 1.4s alternate;
+}
+
+@keyframes flutterWingLeft {
+  0% { transform: scale(0) rotate(40deg); opacity: 0; }
+  65% { transform: scale(1.15) rotate(-15deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes flutterWingRight {
+  0% { transform: scale(0) rotate(-40deg); opacity: 0; }
+  65% { transform: scale(1.15) rotate(15deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes flutterWingIdleLeft {
+  0% { transform: translateY(0px) rotate(-2deg); }
+  100% { transform: translateY(-5px) rotate(4deg); }
+}
+
+@keyframes flutterWingIdleRight {
+  0% { transform: translateY(0px) rotate(2deg); }
+  100% { transform: translateY(-5px) rotate(-4deg); }
+}
+
+/* Diagonal Shimmer Sheen Beam Sweep */
+.flutter-emblem-badge {
+  position: relative;
+  overflow: hidden;
+  border-radius: 26px;
+}
+
+.flutter-shimmer-sheen {
+  position: absolute;
+  top: -50%;
+  left: -100%;
+  width: 60%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  animation: flutterShimmerSweep 2.2s ease-in-out infinite 0.7s;
+  pointer-events: none;
+}
+
+@keyframes flutterShimmerSweep {
+  0% { left: -100%; }
+  50%, 100% { left: 160%; }
+}
+
+/* Staggered Content Entrances (Curves.fastOutSlowIn) */
+.flutter-anim-stagger-1 {
+  animation: flutterFadeDown 0.8s cubic-bezier(0.25, 1, 0.5, 1) both 0.2s;
+}
+
+.flutter-title {
+  animation: flutterFadeUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) both 0.45s;
+}
+
+.flutter-tagline {
+  animation: flutterFadeUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) both 0.6s;
+}
+
+.flutter-desc {
+  animation: flutterFadeUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) both 0.75s;
+}
+
+.flutter-bottom {
+  animation: flutterFadeUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) both 0.85s;
+}
+
+@keyframes flutterFadeDown {
+  0% { opacity: 0; transform: translateY(-24px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes flutterFadeUp {
+  0% { opacity: 0; transform: translateY(24px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Flutter LinearProgressIndicator fill animation */
+.flutter-progress-bar {
+  width: 0%;
+  animation: flutterProgressFill 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes flutterProgressFill {
+  0% { width: 0%; }
+  35% { width: 42%; }
+  75% { width: 85%; }
+  100% { width: 100%; }
+}
